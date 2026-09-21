@@ -1,0 +1,13 @@
+.DS_Store
+DerivedData/
+.build/
+xcuserdata/
+*.xcuserstate
+build/
+dist/
+*.p12
+*.p8
+*.pfx
+*.keychain-db
+.env
+.env.*

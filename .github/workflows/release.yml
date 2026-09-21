@@ -1,0 +1,155 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag (v1.2.3)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: macos-26
+    timeout-minutes: 60
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_TAG: ${{ inputs.tag || github.event.release.tag_name }}
+    steps:
+      - name: Validate release
+        run: |
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+            echo 'Use a stable version tag such as v0.1.0.' >&2
+            exit 1
+          }
+          gh release view "$RELEASE_TAG" --json isDraft,isPrerelease > "$RUNNER_TEMP/release.json"
+          jq -e '.isDraft == false' "$RUNNER_TEMP/release.json"
+          echo "VERSION=${RELEASE_TAG#v}" >> "$GITHUB_ENV"
+          echo "PRERELEASE=$(jq -r .isPrerelease "$RUNNER_TEMP/release.json")" >> "$GITHUB_ENV"
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          persist-credentials: false
+      - name: Install signing and notarization credentials
+        env:
+          APPLE_DEVELOPER_ID_CERTIFICATE_BASE64: ${{ secrets.APPLE_DEVELOPER_ID_CERTIFICATE_BASE64 }}
+          APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD }}
+          APPLE_NOTARY_KEY_BASE64: ${{ secrets.APPLE_NOTARY_KEY_BASE64 }}
+          APPLE_NOTARY_KEY_ID: ${{ secrets.APPLE_NOTARY_KEY_ID }}
+          APPLE_NOTARY_ISSUER_ID: ${{ secrets.APPLE_NOTARY_ISSUER_ID }}
+          HOMEBREW_TAP_DEPLOY_KEY: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
+        run: |
+          for name in APPLE_DEVELOPER_ID_CERTIFICATE_BASE64 APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD \
+            APPLE_NOTARY_KEY_BASE64 APPLE_NOTARY_KEY_ID APPLE_NOTARY_ISSUER_ID HOMEBREW_TAP_DEPLOY_KEY; do
+            [[ -n "${!name}" ]] || { echo "Missing required secret: $name" >&2; exit 1; }
+          done
+          umask 077
+          keychain="$RUNNER_TEMP/posty-signing.keychain-db"
+          password="$(openssl rand -hex 32)"
+          echo "::add-mask::$password"
+          printf '%s' "$APPLE_DEVELOPER_ID_CERTIFICATE_BASE64" | base64 --decode > "$RUNNER_TEMP/developer-id.p12"
+          printf '%s' "$APPLE_NOTARY_KEY_BASE64" | base64 --decode > "$RUNNER_TEMP/notary.p8"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 7200 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          security import "$RUNNER_TEMP/developer-id.p12" -P "$APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD" \
+            -k "$keychain" -T /usr/bin/codesign -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$password" "$keychain" >/dev/null
+          security list-keychains -d user -s "$keychain" "$HOME/Library/Keychains/login.keychain-db"
+          security find-identity -v -p codesigning "$keychain"
+          xcrun notarytool store-credentials posty --key "$RUNNER_TEMP/notary.p8" \
+            --key-id "$APPLE_NOTARY_KEY_ID" --issuer "$APPLE_NOTARY_ISSUER_ID" --keychain "$keychain"
+          rm "$RUNNER_TEMP/developer-id.p12" "$RUNNER_TEMP/notary.p8"
+      - name: Generate project
+        run: |
+          brew install xcodegen
+          xcodebuild -version
+          xcodegen generate
+      - name: Test
+        run: |
+          xcodebuild -project Posty.xcodeproj -scheme Posty \
+            -configuration Debug -destination 'platform=macOS' \
+            -derivedDataPath DerivedData CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= \
+            CODE_SIGNING_REQUIRED=NO test
+      - name: Archive universal app
+        run: |
+          xcodebuild -project Posty.xcodeproj -scheme Posty -configuration Release \
+            -destination 'generic/platform=macOS' -derivedDataPath DerivedData \
+            -archivePath build/Posty.xcarchive 'ARCHS=arm64 x86_64' ONLY_ACTIVE_ARCH=NO \
+            MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" archive
+          app=build/Posty.xcarchive/Products/Applications/Posty.app
+          codesign --verify --deep --strict --verbose=2 "$app"
+          lipo -verify_arch arm64 x86_64 "$app/Contents/MacOS/Posty"
+          lipo -verify_arch arm64 x86_64 "$app/Contents/MacOS/PostySSHAskPass"
+      - name: Notarize and staple
+        run: |
+          app=build/Posty.xcarchive/Products/Applications/Posty.app
+          ditto -c -k --keepParent "$app" "$RUNNER_TEMP/Posty-notarization.zip"
+          xcrun notarytool submit "$RUNNER_TEMP/Posty-notarization.zip" \
+            --keychain-profile posty --keychain "$RUNNER_TEMP/posty-signing.keychain-db" \
+            --wait --timeout 25m --output-format json > build/notarization.json
+          jq -e '.status == "Accepted"' build/notarization.json
+          xcrun stapler staple "$app"
+          xcrun stapler validate "$app"
+          spctl --assess --type execute --verbose=4 "$app"
+      - name: Package and upload release
+        run: |
+          mkdir -p dist
+          ditto -c -k --keepParent build/Posty.xcarchive/Products/Applications/Posty.app "dist/Posty-$VERSION.zip"
+          (cd dist && shasum -a 256 "Posty-$VERSION.zip" > SHA256SUMS)
+          gh release upload "$RELEASE_TAG" "dist/Posty-$VERSION.zip" dist/SHA256SUMS --clobber
+          ditto -c -k --keepParent build/Posty.xcarchive build/Posty.xcarchive.zip
+      - name: Retain Xcode archive and notarization result
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: Posty-archive-${{ env.RELEASE_TAG }}
+          path: |
+            build/Posty.xcarchive.zip
+            build/notarization.json
+          retention-days: 30
+      - name: Check out Homebrew tap
+        if: env.PRERELEASE == 'false'
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: coryoso/homebrew
+          path: homebrew-tap
+          ssh-key: ${{ secrets.HOMEBREW_TAP_DEPLOY_KEY }}
+      - name: Update Homebrew cask
+        if: env.PRERELEASE == 'false'
+        run: |
+          # A retry of an older release must not downgrade the tap.
+          latest="$(gh release view --json tagName --jq .tagName)"
+          [[ "$RELEASE_TAG" == "$latest" ]] || { echo 'Skipping non-latest release'; exit 0; }
+          checksum="$(shasum -a 256 "dist/Posty-$VERSION.zip" | awk '{print $1}')"
+          asset_id="$(gh release view "$RELEASE_TAG" --json assets \
+            --jq '.assets[] | select(.name == "Posty-'"$VERSION"'.zip") | .id')"
+          [[ "$asset_id" =~ ^[0-9]+$ ]]
+          mkdir -p homebrew-tap/Casks
+          sed -e "s/@VERSION@/$VERSION/g" -e "s/@SHA256@/$checksum/g" -e "s/@ASSET_ID@/$asset_id/g" \
+            .github/homebrew/posty.rb.tmpl > homebrew-tap/Casks/posty.rb
+          cd homebrew-tap
+          ruby -c Casks/posty.rb
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add Casks/posty.rb
+          if ! git diff --cached --quiet; then
+            git commit -m "posty $RELEASE_TAG"
+            git pull --rebase
+            git push
+          fi
+      - name: Remove signing credentials
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/posty-signing.keychain-db" || true
+          rm -f "$RUNNER_TEMP/developer-id.p12" "$RUNNER_TEMP/notary.p8" "$RUNNER_TEMP/Posty-notarization.zip"

@@ -1,0 +1,116 @@
+name: Posty
+options:
+  minimumXcodeGenVersion: 2.45.0
+  deploymentTarget:
+    macOS: "26.0"
+settings:
+  base:
+    MACOSX_DEPLOYMENT_TARGET: "26.0"
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    DEVELOPMENT_TEAM: JD26ZWJ4WW
+    CODE_SIGN_STYLE: Manual
+    GENERATE_INFOPLIST_FILE: false
+  configs:
+    Debug:
+      CODE_SIGN_IDENTITY: Apple Development
+    Release:
+      CODE_SIGN_IDENTITY: Developer ID Application
+      OTHER_CODE_SIGN_FLAGS: "--timestamp"
+packages:
+  PostgresNIO:
+    url: https://github.com/vapor/postgres-nio.git
+    from: 1.33.1
+  NIOSSL:
+    url: https://github.com/apple/swift-nio-ssl.git
+    from: 2.25.0
+targets:
+  Posty:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources/Posty
+    info:
+      path: Sources/Posty/Info.plist
+      properties:
+        CFBundleDisplayName: Posty
+        CFBundleName: Posty
+        CFBundleIdentifier: com.corneliuscarl.Posty
+        CFBundleExecutable: Posty
+        CFBundlePackageType: APPL
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSMinimumSystemVersion: "26.0"
+        NSHighResolutionCapable: true
+        NSHumanReadableCopyright: "Copyright © 2026 Cornelius Carl"
+    settings:
+      base:
+        PRODUCT_NAME: Posty
+        PRODUCT_BUNDLE_IDENTIFIER: com.corneliuscarl.Posty
+        ENABLE_HARDENED_RUNTIME: true
+      configs:
+        Release:
+          CODE_SIGN_INJECT_BASE_ENTITLEMENTS: false
+    dependencies:
+      - target: PostySSHAskPass
+        embed: true
+        codeSign: true
+        copy:
+          destination: executables
+      - package: PostgresNIO
+        product: PostgresNIO
+      - package: NIOSSL
+        product: NIOSSL
+      - sdk: Security.framework
+      - sdk: libsqlite3.tbd
+  PostySSHAskPass:
+    type: tool
+    platform: macOS
+    sources:
+      - path: Sources/PostySSHAskPass
+    settings:
+      base:
+        SKIP_INSTALL: true
+        PRODUCT_NAME: PostySSHAskPass
+        PRODUCT_BUNDLE_IDENTIFIER: com.corneliuscarl.Posty.SSHAskPass
+        ENABLE_HARDENED_RUNTIME: true
+      configs:
+        Release:
+          CODE_SIGN_INJECT_BASE_ENTITLEMENTS: false
+    dependencies:
+      - sdk: Security.framework
+  PostyTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests/PostyTests
+    dependencies:
+      - target: Posty
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.corneliuscarl.PostyTests
+        GENERATE_INFOPLIST_FILE: true
+  PostyUITests:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - path: Tests/PostyUITests
+    dependencies:
+      - target: Posty
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.corneliuscarl.PostyUITests
+        GENERATE_INFOPLIST_FILE: true
+
+schemes:
+  Posty:
+    build:
+      targets:
+        Posty: all
+    test:
+      targets:
+        - PostyTests
+        - PostyUITests
+    archive:
+      config: Release
