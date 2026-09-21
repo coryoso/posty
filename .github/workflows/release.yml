@@ -93,9 +93,9 @@ jobs:
             MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" archive
           app=build/Posty.xcarchive/Products/Applications/Posty.app
           codesign --verify --deep --strict --verbose=2 "$app"
-          lipo "$app/Contents/MacOS/Posty" -verify_arch arm64 x86_64
-          lipo "$app/Contents/MacOS/PostySSHAskPass" -verify_arch arm64 x86_64
-          for executable in "$app" "$app/Contents/MacOS/PostySSHAskPass"; do
+          for executable in "$app/Contents/MacOS/Posty" "$app/Contents/MacOS/PostySSHAskPass"; do
+            architectures=" $(lipo -archs "$executable") "
+            [[ "$architectures" == *" arm64 "* && "$architectures" == *" x86_64 "* ]]
             codesign --verify --strict "$executable"
             codesign -dv --verbose=2 "$executable" 2>&1 | tee build/signature.txt
             grep -q 'Authority=Developer ID Application: Cornelius Carl (JD26ZWJ4WW)' build/signature.txt
