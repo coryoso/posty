@@ -9,7 +9,7 @@ cask "posty" do
   desc "Native PostgreSQL client"
   homepage "https://github.com/coryoso/posty"
 
-  depends_on macos: ">= :tahoe"
+  depends_on macos: :tahoe
 
   app "Posty.app"
 end
