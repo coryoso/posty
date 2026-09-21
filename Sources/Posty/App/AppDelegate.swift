@@ -47,6 +47,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             onConnect: { [weak self] profile in self?.openWorkspace(profile, in: identifier) }
         )
         let controller = NSHostingController(rootView: view)
+        controller.sceneBridgingOptions = [.title, .toolbars]
         let window = NSWindow(contentViewController: controller)
         window.identifier = NSUserInterfaceItemIdentifier(identifier)
         window.title = "Connections"
@@ -66,8 +67,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         guard let window = windows[identifier] else { return }
         let model = WorkspaceModel(profile: profile, appModel: appModel)
         let view = WorkspaceView(model: model)
-        window.contentViewController = NSHostingController(rootView: view)
+        let controller = NSHostingController(rootView: view)
+        controller.sceneBridgingOptions = .toolbars
+        window.contentViewController = controller
         window.title = profile.name
+        window.subtitle = ""
         window.minSize = NSSize(width: 920, height: 620)
         window.contentMinSize = NSSize(width: 920, height: 620)
         window.toolbarStyle = .unified
