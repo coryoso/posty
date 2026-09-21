@@ -50,17 +50,6 @@
                ReferencedContainer = "container:Posty.xcodeproj">
             </BuildableReference>
          </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "1881E2F9D8F5BE54A1FB9013"
-               BuildableName = "PostyUITests.xctest"
-               BlueprintName = "PostyUITests"
-               ReferencedContainer = "container:Posty.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
       <CommandLineArguments>
       </CommandLineArguments>
