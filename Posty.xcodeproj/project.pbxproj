@@ -13,6 +13,7 @@
 		1F0613B8069DF4EF4582B8E1 /* NIOSSL in Frameworks */ = {isa = PBXBuildFile; productRef = 09E06D528E40AEE3A534455E /* NIOSSL */; };
 		205C934113EE2B8C8AAE6899 /* WorkspaceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8E292F1C064ECAC2D9BB180 /* WorkspaceModel.swift */; };
 		23C3B86D0F45344F079074EA /* SSHTunnel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EED32B29427D52FDB3B22E9F /* SSHTunnel.swift */; };
+		287D341CAA69EF9DF04B9130 /* KeychainConnectionStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2608168E39A291A3C390680E /* KeychainConnectionStoreTests.swift */; };
 		2E99C8FF131C6BAA2B673BF4 /* CatalogLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF443E201EA90FD9F96D7430 /* CatalogLoader.swift */; };
 		31F5C0DFC4D26CA4AA021281 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96F5FAA061C30DECB0EC049B /* Security.framework */; };
 		3C0973A48AE8A1538D7123B3 /* PostyUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80B803ADFAC4288221178A3C /* PostyUITests.swift */; };
@@ -102,6 +103,7 @@
 		131AD992AC131D99113F0D9B /* QueryTabModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryTabModel.swift; sourceTree = "<group>"; };
 		15119192A248530783A38EAB /* Posty.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Posty.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C89D6D608EB05CB53611F5A /* WorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceView.swift; sourceTree = "<group>"; };
+		2608168E39A291A3C390680E /* KeychainConnectionStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainConnectionStoreTests.swift; sourceTree = "<group>"; };
 		289D575DFB5CC1535E5105EE /* CodexBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexBridgeTests.swift; sourceTree = "<group>"; };
 		2E9DFB7C232EDFB409400302 /* SQLDiffView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLDiffView.swift; sourceTree = "<group>"; };
 		2F35B4E2528457F6422C4181 /* RelationTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelationTabView.swift; sourceTree = "<group>"; };
@@ -176,6 +178,7 @@
 				CC137B040F4C208C90F26F4C /* DatabaseIntegrationTests.swift */,
 				F9FD2FFE8120E2BA4E1F7DC4 /* DatabaseValueTests.swift */,
 				10E065173C8C9F4B991FB5D9 /* FilterExpressionTests.swift */,
+				2608168E39A291A3C390680E /* KeychainConnectionStoreTests.swift */,
 				FDB2FA1F115DD5ABA30D3541 /* LocalStoreTests.swift */,
 				966582A831695D340A38FD21 /* SQLLexerTests.swift */,
 			);
@@ -489,6 +492,7 @@
 				B0CBB02F9694B82A326AA067 /* DatabaseIntegrationTests.swift in Sources */,
 				CA7B9B2EAEA8534549298106 /* DatabaseValueTests.swift in Sources */,
 				7672F4A496239AB142857AB6 /* FilterExpressionTests.swift in Sources */,
+				287D341CAA69EF9DF04B9130 /* KeychainConnectionStoreTests.swift in Sources */,
 				990E4C1C05D21AF4A542B4D3 /* LocalStoreTests.swift in Sources */,
 				4FF8F5946580465E9F1F0A2C /* SQLLexerTests.swift in Sources */,
 			);
@@ -637,7 +641,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;

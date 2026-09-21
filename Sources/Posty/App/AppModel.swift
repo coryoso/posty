@@ -14,7 +14,7 @@ final class AppModel {
     let codex = CodexBridge()
 
     init() {
-        localStore = try? LocalStore()
+        localStore = ProcessInfo.processInfo.environment["POSTY_TESTING"] == "1" ? nil : try? LocalStore()
         reloadProfiles()
     }
 

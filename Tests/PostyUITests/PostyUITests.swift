@@ -4,6 +4,7 @@ final class PostyUITests: XCTestCase {
     @MainActor
     func testConnectionManagerLaunches() {
         let app = XCUIApplication()
+        app.launchEnvironment["POSTY_TESTING"] = "1"
         app.launch()
         XCTAssertTrue(app.windows.firstMatch.waitForExistence(timeout: 8))
         XCTAssertTrue(app.staticTexts["Connections"].exists || app.buttons["New Connection"].exists)
@@ -12,6 +13,7 @@ final class PostyUITests: XCTestCase {
     @MainActor
     func testConnectionEditorAndNewWindowCommand() {
         let app = XCUIApplication()
+        app.launchEnvironment["POSTY_TESTING"] = "1"
         app.launch()
         XCTAssertTrue(app.windows.firstMatch.waitForExistence(timeout: 8))
 

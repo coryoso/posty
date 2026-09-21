@@ -2,13 +2,23 @@ import Foundation
 import Security
 
 final class KeychainConnectionStore: @unchecked Sendable {
-    static let shared = KeychainConnectionStore()
+    static let shared = KeychainConnectionStore(servicePrefix:
+        ProcessInfo.processInfo.environment["POSTY_TESTING"] == "1"
+            ? "com.corneliuscarl.Posty.tests.\(UUID().uuidString)"
+            : "com.corneliuscarl.Posty"
+    )
 
-    private let profileService = "com.corneliuscarl.Posty.connections"
-    private let sshPasswordService = "com.corneliuscarl.Posty.ssh-password"
-    private let sshPassphraseService = "com.corneliuscarl.Posty.ssh-passphrase"
+    private let profileService: String
+    private let sshPasswordService: String
+    private let sshPassphraseService: String
     private let encoder = JSONEncoder()
     private let decoder = JSONDecoder()
+
+    init(servicePrefix: String = "com.corneliuscarl.Posty") {
+        profileService = "\(servicePrefix).connections"
+        sshPasswordService = "\(servicePrefix).ssh-password"
+        sshPassphraseService = "\(servicePrefix).ssh-passphrase"
+    }
 
     func loadAll() throws -> [ConnectionProfile] {
         let query: [CFString: Any] = [
@@ -72,14 +82,14 @@ final class KeychainConnectionStore: @unchecked Sendable {
             kSecAttrService: service,
             kSecAttrAccount: account
         ]
-        var attributes: [CFString: Any] = [kSecValueData: data]
-        if let access = try trustedAccess() { attributes[kSecAttrAccess] = access }
-        let updateStatus = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
+        // Preserve the existing ACL, including the user's “Always Allow” decisions.
+        let updateStatus = SecItemUpdate(query as CFDictionary, [kSecValueData: data] as CFDictionary)
         if updateStatus == errSecSuccess { return }
         guard updateStatus == errSecItemNotFound else { throw KeychainError.status(updateStatus) }
 
         var insert = query
         insert[kSecValueData] = data
+        insert[kSecAttrAccess] = try trustedAccess(includeHelper: service != profileService)
         insert[kSecAttrAccessible] = kSecAttrAccessibleWhenUnlocked
         let insertStatus = SecItemAdd(insert as CFDictionary, nil)
         guard insertStatus == errSecSuccess else { throw KeychainError.status(insertStatus) }
@@ -101,7 +111,7 @@ final class KeychainConnectionStore: @unchecked Sendable {
         return data
     }
 
-    private func trustedAccess() throws -> SecAccess? {
+    private func trustedAccess(includeHelper: Bool) throws -> SecAccess? {
         var applications: [SecTrustedApplication] = []
 
         var mainApplication: SecTrustedApplication?
@@ -109,7 +119,8 @@ final class KeychainConnectionStore: @unchecked Sendable {
         guard mainStatus == errSecSuccess else { throw KeychainError.status(mainStatus) }
         if let mainApplication { applications.append(mainApplication) }
 
-        if let helperPath = Bundle.main.url(forResource: "PostySSHAskPass", withExtension: nil)?.path {
+        if includeHelper, let helperPath = Bundle.main.path(forAuxiliaryExecutable: "PostySSHAskPass")
+            ?? Bundle.main.path(forResource: "PostySSHAskPass", ofType: nil) {
             var helperApplication: SecTrustedApplication?
             let helperStatus = SecTrustedApplicationCreateFromPath(helperPath, &helperApplication)
             guard helperStatus == errSecSuccess else { throw KeychainError.status(helperStatus) }

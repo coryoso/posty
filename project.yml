@@ -14,7 +14,7 @@ settings:
     GENERATE_INFOPLIST_FILE: false
   configs:
     Debug:
-      CODE_SIGN_IDENTITY: Apple Development
+      CODE_SIGN_IDENTITY: Developer ID Application
     Release:
       CODE_SIGN_IDENTITY: Developer ID Application
       OTHER_CODE_SIGN_FLAGS: "--timestamp"
@@ -109,6 +109,8 @@ schemes:
       targets:
         Posty: all
     test:
+      environmentVariables:
+        POSTY_TESTING: "1"
       targets:
         - PostyTests
         - PostyUITests
