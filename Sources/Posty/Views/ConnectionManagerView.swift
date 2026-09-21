@@ -184,31 +184,6 @@ struct ConnectionManagerView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Recent Connections").font(.title2.bold())
-                    Text("Connect to PostgreSQL directly or through SSH").foregroundStyle(.secondary)
-                }
-                Spacer()
-                Button { model.beginCreate() } label: {
-                    Label("New Connection", systemImage: "plus")
-                }
-                .buttonStyle(.borderedProminent)
-                .accessibilityIdentifier("newConnection")
-            }
-            .padding(16)
-
-            HStack {
-                Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                TextField("Filter connections", text: $model.profileSearch).textFieldStyle(.plain)
-            }
-            .padding(.horizontal, 10)
-            .frame(height: 34)
-            .background(.quaternary.opacity(0.65), in: RoundedRectangle(cornerRadius: 9))
-            .padding(.horizontal, 16)
-            .padding(.bottom, 10)
-
-            Divider()
             if model.visibleProfiles.isEmpty {
                 ContentUnavailableView {
                     Label("No Connections", systemImage: "cylinder")
@@ -219,6 +194,7 @@ struct ConnectionManagerView: View {
                         Button("New Connection") { model.beginCreate() }
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 List(model.visibleProfiles) { profile in
                     ConnectionRow(
@@ -247,6 +223,18 @@ struct ConnectionManagerView: View {
             .padding(.horizontal, 16)
             .frame(height: 38)
             .background(.bar)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .navigationTitle("Connections")
+        .navigationSubtitle("PostgreSQL · Direct and SSH")
+        .searchable(text: $model.profileSearch, placement: .toolbar, prompt: "Search Connections")
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button("New Connection", systemImage: "plus") { model.beginCreate() }
+                    .keyboardShortcut("n", modifiers: [.command, .shift])
+                    .help("New Connection")
+                    .accessibilityIdentifier("newConnection")
+            }
         }
         .sheet(isPresented: $model.isEditorPresented) {
             ConnectionEditorSheet(model: model)
