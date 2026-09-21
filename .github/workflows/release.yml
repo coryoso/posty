@@ -143,11 +143,8 @@ jobs:
           latest="$(gh release view --json tagName --jq .tagName)"
           [[ "$RELEASE_TAG" == "$latest" ]] || { echo 'Skipping non-latest release'; exit 0; }
           checksum="$(shasum -a 256 "dist/Posty-$VERSION.zip" | awk '{print $1}')"
-          asset_id="$(gh api "repos/$GH_REPO/releases/tags/$RELEASE_TAG" \
-            --jq '.assets[] | select(.name == "Posty-'"$VERSION"'.zip") | .id')"
-          [[ "$asset_id" =~ ^[0-9]+$ ]]
           mkdir -p homebrew-tap/Casks
-          sed -e "s/@VERSION@/$VERSION/g" -e "s/@SHA256@/$checksum/g" -e "s/@ASSET_ID@/$asset_id/g" \
+          sed -e "s/@VERSION@/$VERSION/g" -e "s/@SHA256@/$checksum/g" \
             .github/homebrew/posty.rb.tmpl > homebrew-tap/Casks/posty.rb
           cd homebrew-tap
           ruby -c Casks/posty.rb

@@ -1,76 +1,130 @@
 # Posty
 
-Posty is a native macOS PostgreSQL client built with Swift 6, SwiftUI, focused AppKit bridges, XcodeGen, and PostgresNIO.
+Posty is a native PostgreSQL client for macOS. Connect to a database, browse its tables and schema, run SQL, edit rows, and export results from one workspace.
+
+Posty is in early development. It requires **macOS 26 or newer** and runs on Apple silicon and Intel Macs.
 
 ## Install
 
-Release builds are signed and notarized universal apps for Apple silicon and Intel Macs running macOS 26 or newer.
-The repository and downloads are private; your GitHub account must have access. With `gh` already signed in:
+### Homebrew
 
 ```sh
 brew tap coryoso/homebrew https://github.com/coryoso/homebrew.git
-HOMEBREW_GITHUB_API_TOKEN="$(gh auth token)" brew install --cask coryoso/homebrew/posty
+brew install --cask coryoso/homebrew/posty
 ```
 
-Use the same token environment variable with `brew upgrade --cask coryoso/homebrew/posty`.
-The public tap contains the cask definition; the app archive stays in the private repository.
+If Homebrew asks you to trust this third-party cask, review it and run `brew trust --cask coryoso/homebrew/posty`, then repeat the install command.
 
-## Requirements
-
-- macOS 26 and Xcode 26
-- [XcodeGen](https://github.com/yonaskolb/XcodeGen)
-- An installed `codex` CLI configured with the `azure` provider and access to `gpt-5.6-luna` and `gpt-5.6-terra` for AI features
-
-## Build
+To update an installed copy:
 
 ```sh
+brew update
+brew upgrade --cask coryoso/homebrew/posty
+```
+
+### Download the app
+
+Download `Posty-<version>.zip` from [Releases](https://github.com/coryoso/posty/releases/latest), unzip it, and move **Posty.app** into **Applications**. Release builds are signed and notarized by Apple. You do not need Xcode or a GitHub account to use them.
+
+## Getting started
+
+1. Open Posty and choose **New Connection**. Enter the host, port, database, username, and password, or import a PostgreSQL connection URL.
+2. Choose the appropriate TLS settings. If your database is reached through a jump host, configure the SSH connection as well. Check the host fingerprint before trusting a new SSH server.
+3. Use **Test** to check the connection, **Show Databases** to choose a database, or **Connect** to open the workspace.
+4. Browse database objects in the sidebar, or choose **New Query** and run SQL with **⌘ Return**.
+
+## What you can do
+
+- Browse tables and views, inspect columns, constraints, indexes, and DDL, and page through filtered results.
+- Insert, edit, and delete rows where the relation supports editing. Changes are staged until you choose **Save**; **Discard** reloads the data without applying them.
+- Work with query tabs, save queries into folders, and revisit query history.
+- Export table or query results as CSV or JSON, including selected rows.
+- Build charts from query results.
+- Connect directly or through SSH using a password or an SSH key.
+
+### Optional SQL assistant
+
+The assistant can suggest SQL changes, turn natural-language requests into table filters, and suggest charts. Review proposed SQL before applying or running it.
+
+AI currently requires a separately installed `codex` CLI, an active `azure` provider, and access to both `gpt-5.6-luna` and `gpt-5.6-terra`. This is a specific configuration requirement, not something included with the app. Posty checks it at startup and leaves AI unavailable when it is not configured; browsing, SQL, editing, exports, and manual charts still work.
+
+## Your data
+
+Connection profiles, database passwords, and SSH passwords/passphrases are stored in your macOS Keychain. SSH uses the system OpenSSH client; Posty remembers trusted host keys and rejects changed keys.
+
+Saved queries, folders, chat transcripts, chart definitions, workspace state, and execution metadata are stored locally in `~/Library/Application Support/Posty/`. Query result rows are not automatically persisted. SQL text, chat text, and files you explicitly export can contain database information.
+
+When you use AI, schema and SQL context may be sent to your configured provider. Database values are excluded unless you explicitly attach them to that request.
+
+## Build and run from source
+
+You need macOS 26+, a full Xcode 26+ installation, and [XcodeGen](https://github.com/yonaskolb/XcodeGen). The app uses Swift 6, SwiftUI/AppKit, PostgresNIO, and NIOSSL; Xcode resolves the Swift packages during the build.
+
+```sh
+brew install xcodegen
+git clone https://github.com/coryoso/posty.git
+cd posty
 xcodegen generate
-open Posty.xcodeproj
 ```
 
-The generated Xcode project is intentionally not the source of truth. Change `project.yml`, then regenerate it.
-
-For a command-line build:
-
-If `xcode-select -p` points to `/Library/Developer/CommandLineTools`, select the installed Xcode for your shell first (adjust the path for your installation):
+If `xcode-select -p` points to Command Line Tools rather than Xcode, select your Xcode installation for this shell (adjust the path if needed):
 
 ```sh
-export DEVELOPER_DIR=/Applications/Xcode-27.0.0.app/Contents/Developer
+export DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer
 ```
+
+### Run manually
+
+For a local development build without the maintainer's distribution certificate:
 
 ```sh
-xcodebuild -project Posty.xcodeproj -scheme Posty -configuration Debug -derivedDataPath DerivedData build
+xcodebuild -project Posty.xcodeproj -scheme Posty \
+  -configuration Debug -destination 'platform=macOS' \
+  -derivedDataPath DerivedData \
+  CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO DEVELOPMENT_TEAM= build
+open DerivedData/Build/Products/Debug/Posty.app
 ```
 
-Local Debug and Release builds use the same Developer ID Application identity for team `JD26ZWJ4WW`, so Keychain trust survives rebuilds and switching between those builds. CI uses ad-hoc signing only for isolated tests; distributed releases use Developer ID signing and Hardened Runtime.
-
-The test scheme sets `POSTY_TESTING=1`, giving each test process a separate Keychain namespace and disabling the real local store, startup windows, and automatic AI startup. Avoid launching ad-hoc builds against your real saved connections.
-
-## Tests
+This uses ad-hoc signing. Such builds can ask for Keychain access again after a rebuild or when switching from the released app. For regular development, use a consistent Apple Development identity and your own team instead:
 
 ```sh
-xcodebuild -project Posty.xcodeproj -scheme Posty -derivedDataPath DerivedData test
+xcodebuild -project Posty.xcodeproj -scheme Posty \
+  -configuration Debug -destination 'platform=macOS' \
+  -derivedDataPath DerivedData \
+  CODE_SIGN_IDENTITY='Apple Development' DEVELOPMENT_TEAM=YOUR_TEAM_ID build
 ```
 
-Database integration tests are opt-in. Start PostgreSQL 14–18 locally and supply its port:
+Replace `YOUR_TEAM_ID` with your development team and ensure its signing certificate is installed. You can also open `Posty.xcodeproj` in Xcode, configure local signing for the app and SSH helper, and run the **Posty** scheme on **My Mac**. Keep personal signing changes out of pull requests.
+
+### Run tests
 
 ```sh
-POSTY_TEST_POSTGRES_PORT=5432 xcodebuild -project Posty.xcodeproj -scheme Posty -derivedDataPath DerivedData test -only-testing:PostyTests/DatabaseIntegrationTests
+xcodebuild -project Posty.xcodeproj -scheme Posty \
+  -configuration Debug -destination 'platform=macOS' \
+  -derivedDataPath DerivedData \
+  CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO DEVELOPMENT_TEAM= test
 ```
 
-## Security and storage
+The test scheme isolates Keychain records and disables the normal app startup and local store. The default suite does not require a running database or AI service.
 
-Connection profiles and their secrets are stored as Keychain records. Saved queries, folders, chat transcripts, chart specifications, workspace restoration, and execution metadata are stored in app-local SQLite. Query result rows are not persisted.
+The optional database integration test uses PostgreSQL 14–18 on `localhost`, database `postgres`, user `postgres`, with no password. Use a disposable local test database: the test creates and removes tables, types, and domains in its `public` schema.
 
-SSH connections use the system OpenSSH client and an embedded askpass helper. Host keys are pinned in Posty's application-support directory and changed keys are rejected.
+```sh
+POSTY_TEST_POSTGRES_PORT=5432 xcodebuild -project Posty.xcodeproj -scheme Posty \
+  -configuration Debug -destination 'platform=macOS' -derivedDataPath DerivedData \
+  CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO DEVELOPMENT_TEAM= \
+  test -only-testing:PostyTests/DatabaseIntegrationTests
+```
 
-Posty launches `codex app-server` through the login shell, verifies that Azure is the active provider, and disables AI when the expected provider or models are unavailable. Schema and SQL context can be sent to AI; database values are excluded unless explicitly attached for that request.
+The live AI test is also opt-in, using `POSTY_CODEX_SMOKE=1` with the test command and the AI configuration described above.
 
-## Releases and automation
+## Contributing
 
-- **Build and test** runs on pull requests and `main`, then keeps a development app ZIP and test results for seven days. Development artifacts use ad-hoc signing and are not distribution releases.
-- **Label pull requests** uses conventional PR titles (`feat:`, `fix:`, `perf:`, `docs:`, `deps:`, `chore:`, `ci:`, `build:`, `refactor:`, `test:`), branch prefixes, and changed paths. `feat!:` or `fix!:` adds `breaking`. Area labels describe the changed code. The labeler reads PR metadata and never executes PR code with write permissions.
-- **Draft release notes** updates the next draft after pushes to `main`, grouped by breaking changes, features, fixes, performance, dependencies, documentation, maintenance, and other changes. `skip-changelog` excludes a PR. Labels can be adjusted before merging; review automatically assigned labels when renaming a PR.
-- **Release** runs when you publish the draft, or manually for an existing published release. Use a `vMAJOR.MINOR.PATCH` tag. It tests, archives both architectures, signs the app and SSH helper with Developer ID and Hardened Runtime, notarizes, staples, verifies Gatekeeper, uploads the ZIP and SHA-256 checksum, and updates the Homebrew cask for the latest stable release. The signed Xcode archive and notarization result are retained for 30 days. Missing credentials or failed notarization stop publication of binaries.
+Bug reports and focused pull requests are welcome. For a bug report, include your macOS and Posty versions, steps to reproduce it, and the expected behavior. Use anonymized SQL and sample data; remove connection details and credentials from logs and screenshots.
 
-To ship, open the draft in [GitHub Releases](https://github.com/coryoso/posty/releases), review the version and notes, then publish it. To retry a failed asset build, run **Release** manually with that release tag. A prerelease flagged in GitHub does not update the stable tap.
+1. Fork the repository and create a branch for your change.
+2. Build and run the app locally. Add or update a focused test when changing behavior, then run the relevant tests.
+3. If build settings or targets need changes, edit **`project.yml`** and run `xcodegen generate`. Commit the generated project changes with it; the YAML file is the source of truth.
+4. Open a pull request describing the problem, your change, and how you checked it. For visible interface changes, include a screenshot with sample data.
+
+Use PR titles such as `feat: add …`, `fix: correct …`, or `docs: explain …`. Automation applies labels and groups merged changes into release notes. CI builds the app and runs tests; its development artifacts are for testing. Install signed releases for everyday use.
