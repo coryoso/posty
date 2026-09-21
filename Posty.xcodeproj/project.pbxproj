@@ -13,9 +13,9 @@
 		1F0613B8069DF4EF4582B8E1 /* NIOSSL in Frameworks */ = {isa = PBXBuildFile; productRef = 09E06D528E40AEE3A534455E /* NIOSSL */; };
 		205C934113EE2B8C8AAE6899 /* WorkspaceModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8E292F1C064ECAC2D9BB180 /* WorkspaceModel.swift */; };
 		23C3B86D0F45344F079074EA /* SSHTunnel.swift in Sources */ = {isa = PBXBuildFile; fileRef = EED32B29427D52FDB3B22E9F /* SSHTunnel.swift */; };
+		287D341CAA69EF9DF04B9130 /* KeychainConnectionStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2608168E39A291A3C390680E /* KeychainConnectionStoreTests.swift */; };
 		2E99C8FF131C6BAA2B673BF4 /* CatalogLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF443E201EA90FD9F96D7430 /* CatalogLoader.swift */; };
 		31F5C0DFC4D26CA4AA021281 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96F5FAA061C30DECB0EC049B /* Security.framework */; };
-		3C0973A48AE8A1538D7123B3 /* PostyUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80B803ADFAC4288221178A3C /* PostyUITests.swift */; };
 		41789E3A6F936A6D10FE209E /* SQLIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C467332DDDA5111D9FC4D32 /* SQLIdentifier.swift */; };
 		41D320388575F75F003F3E38 /* PostyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE297A123AEE6A67647FE333 /* PostyApp.swift */; };
 		4594CD5054C6D8570CB53F1A /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 128B365142FD13360ED187C5 /* AppModel.swift */; };
@@ -57,13 +57,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		28A2E0FA50B2FA6D9AFAD4B2 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 18FB811D00F49B50B8B8913A /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = DBEF7CA04B4813B1A73A1EFA;
-			remoteInfo = Posty;
-		};
 		552D43BB855DEC1195434E19 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 18FB811D00F49B50B8B8913A /* Project object */;
@@ -102,6 +95,7 @@
 		131AD992AC131D99113F0D9B /* QueryTabModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryTabModel.swift; sourceTree = "<group>"; };
 		15119192A248530783A38EAB /* Posty.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Posty.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1C89D6D608EB05CB53611F5A /* WorkspaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceView.swift; sourceTree = "<group>"; };
+		2608168E39A291A3C390680E /* KeychainConnectionStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainConnectionStoreTests.swift; sourceTree = "<group>"; };
 		289D575DFB5CC1535E5105EE /* CodexBridgeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexBridgeTests.swift; sourceTree = "<group>"; };
 		2E9DFB7C232EDFB409400302 /* SQLDiffView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLDiffView.swift; sourceTree = "<group>"; };
 		2F35B4E2528457F6422C4181 /* RelationTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelationTabView.swift; sourceTree = "<group>"; };
@@ -118,7 +112,6 @@
 		6C467332DDDA5111D9FC4D32 /* SQLIdentifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLIdentifier.swift; sourceTree = "<group>"; };
 		6D165741769A8C5D686F7D0E /* DatabaseValue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseValue.swift; sourceTree = "<group>"; };
 		7208AF0ABD4F5D08732160AF /* DatabaseSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseSession.swift; sourceTree = "<group>"; };
-		80B803ADFAC4288221178A3C /* PostyUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostyUITests.swift; sourceTree = "<group>"; };
 		82121009C341D15F52548E0F /* SQLLexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLLexer.swift; sourceTree = "<group>"; };
 		8560D8C10A2A98ED2D1B8488 /* QueryModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QueryModels.swift; sourceTree = "<group>"; };
 		91A2A45C8E7A2E1D79E037A7 /* ChartBuilderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChartBuilderView.swift; sourceTree = "<group>"; };
@@ -126,7 +119,6 @@
 		966582A831695D340A38FD21 /* SQLLexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLLexerTests.swift; sourceTree = "<group>"; };
 		96F5FAA061C30DECB0EC049B /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		98F83E5D925CFF4B66E22712 /* ConnectionProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionProfile.swift; sourceTree = "<group>"; };
-		A64212BEA0A234229C1CF193 /* PostyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PostyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BE297A123AEE6A67647FE333 /* PostyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostyApp.swift; sourceTree = "<group>"; };
 		CC137B040F4C208C90F26F4C /* DatabaseIntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseIntegrationTests.swift; sourceTree = "<group>"; };
 		CF443E201EA90FD9F96D7430 /* CatalogLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CatalogLoader.swift; sourceTree = "<group>"; };
@@ -176,6 +168,7 @@
 				CC137B040F4C208C90F26F4C /* DatabaseIntegrationTests.swift */,
 				F9FD2FFE8120E2BA4E1F7DC4 /* DatabaseValueTests.swift */,
 				10E065173C8C9F4B991FB5D9 /* FilterExpressionTests.swift */,
+				2608168E39A291A3C390680E /* KeychainConnectionStoreTests.swift */,
 				FDB2FA1F115DD5ABA30D3541 /* LocalStoreTests.swift */,
 				966582A831695D340A38FD21 /* SQLLexerTests.swift */,
 			);
@@ -198,15 +191,6 @@
 			);
 			name = Posty;
 			path = Sources/Posty;
-			sourceTree = "<group>";
-		};
-		2BBC7A4138FAE7A4FB7F7A7D /* PostyUITests */ = {
-			isa = PBXGroup;
-			children = (
-				80B803ADFAC4288221178A3C /* PostyUITests.swift */,
-			);
-			name = PostyUITests;
-			path = Tests/PostyUITests;
 			sourceTree = "<group>";
 		};
 		30BD9CD7091D87B52C9C9894 /* Persistence */ = {
@@ -250,7 +234,6 @@
 				15119192A248530783A38EAB /* Posty.app */,
 				6303B2D0FBCE9D628A53EFA9 /* PostySSHAskPass */,
 				E8EE5CB56A8AC1C534941D6F /* PostyTests.xctest */,
-				A64212BEA0A234229C1CF193 /* PostyUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -340,7 +323,6 @@
 				1EF463A46CBC453C5D8A256B /* Posty */,
 				4BD830CFADCC10317CD08D8E /* PostySSHAskPass */,
 				00E66633F27CB44284003306 /* PostyTests */,
-				2BBC7A4138FAE7A4FB7F7A7D /* PostyUITests */,
 				44CDE50954BE840CF4F82B3C /* Frameworks */,
 				5A7C16195DA95FE9D49B28B7 /* Products */,
 			);
@@ -366,24 +348,6 @@
 			productName = PostyTests;
 			productReference = E8EE5CB56A8AC1C534941D6F /* PostyTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
-		};
-		1881E2F9D8F5BE54A1FB9013 /* PostyUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 53228B3A62D2676C91DEC081 /* Build configuration list for PBXNativeTarget "PostyUITests" */;
-			buildPhases = (
-				B50C663AC139F7EDFCCF5D03 /* Sources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				7CAC66BA1C0FCCFCDD41016C /* PBXTargetDependency */,
-			);
-			name = PostyUITests;
-			packageProductDependencies = (
-			);
-			productName = PostyUITests;
-			productReference = A64212BEA0A234229C1CF193 /* PostyUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 		7677EEF0CD4C385C866D5923 /* PostySSHAskPass */ = {
 			isa = PBXNativeTarget;
@@ -438,11 +402,6 @@
 						DevelopmentTeam = JD26ZWJ4WW;
 						ProvisioningStyle = Manual;
 					};
-					1881E2F9D8F5BE54A1FB9013 = {
-						DevelopmentTeam = JD26ZWJ4WW;
-						ProvisioningStyle = Manual;
-						TestTargetID = DBEF7CA04B4813B1A73A1EFA;
-					};
 					7677EEF0CD4C385C866D5923 = {
 						DevelopmentTeam = JD26ZWJ4WW;
 						ProvisioningStyle = Manual;
@@ -474,7 +433,6 @@
 				DBEF7CA04B4813B1A73A1EFA /* Posty */,
 				7677EEF0CD4C385C866D5923 /* PostySSHAskPass */,
 				1669932DCDF63E4172E2905A /* PostyTests */,
-				1881E2F9D8F5BE54A1FB9013 /* PostyUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -489,16 +447,9 @@
 				B0CBB02F9694B82A326AA067 /* DatabaseIntegrationTests.swift in Sources */,
 				CA7B9B2EAEA8534549298106 /* DatabaseValueTests.swift in Sources */,
 				7672F4A496239AB142857AB6 /* FilterExpressionTests.swift in Sources */,
+				287D341CAA69EF9DF04B9130 /* KeychainConnectionStoreTests.swift in Sources */,
 				990E4C1C05D21AF4A542B4D3 /* LocalStoreTests.swift in Sources */,
 				4FF8F5946580465E9F1F0A2C /* SQLLexerTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		B50C663AC139F7EDFCCF5D03 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				3C0973A48AE8A1538D7123B3 /* PostyUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -552,11 +503,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		7CAC66BA1C0FCCFCDD41016C /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = DBEF7CA04B4813B1A73A1EFA /* Posty */;
-			targetProxy = 28A2E0FA50B2FA6D9AFAD4B2 /* PBXContainerItemProxy */;
-		};
 		AE15BB2705B3ABC82A35234A /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 7677EEF0CD4C385C866D5923 /* PostySSHAskPass */;
@@ -570,23 +516,6 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		4B9F67AA1F22988D1522CB65 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				COMBINE_HIDPI_IMAGES = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.corneliuscarl.PostyUITests;
-				SDKROOT = macosx;
-				TEST_TARGET_NAME = Posty;
-			};
-			name = Release;
-		};
 		65C699976904788949FB90B2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -637,7 +566,7 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
-				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_IDENTITY = "Developer ID Application";
 				CODE_SIGN_STYLE = Manual;
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
@@ -703,23 +632,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.corneliuscarl.Posty;
 				PRODUCT_NAME = Posty;
 				SDKROOT = macosx;
-			};
-			name = Debug;
-		};
-		967A34FD5F45653CBF7EC0B0 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				COMBINE_HIDPI_IMAGES = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.corneliuscarl.PostyUITests;
-				SDKROOT = macosx;
-				TEST_TARGET_NAME = Posty;
 			};
 			name = Debug;
 		};
@@ -855,15 +767,6 @@
 			buildConfigurations = (
 				69B93BCC8D5BD2F54DD84B0B /* Debug */,
 				65C699976904788949FB90B2 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		53228B3A62D2676C91DEC081 /* Build configuration list for PBXNativeTarget "PostyUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				967A34FD5F45653CBF7EC0B0 /* Debug */,
-				4B9F67AA1F22988D1522CB65 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

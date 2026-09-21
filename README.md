@@ -42,7 +42,9 @@ export DEVELOPER_DIR=/Applications/Xcode-27.0.0.app/Contents/Developer
 xcodebuild -project Posty.xcodeproj -scheme Posty -configuration Debug -derivedDataPath DerivedData build
 ```
 
-Debug builds use the installed Apple Development identity for team `JD26ZWJ4WW`. Release builds use the installed Developer ID Application identity and Hardened Runtime for direct distribution.
+Local Debug and Release builds use the same Developer ID Application identity for team `JD26ZWJ4WW`, so Keychain trust survives rebuilds and switching between those builds. CI uses ad-hoc signing only for isolated tests; distributed releases use Developer ID signing and Hardened Runtime.
+
+The test scheme sets `POSTY_TESTING=1`, giving each test process a separate Keychain namespace and disabling the real local store, startup windows, and automatic AI startup. Avoid launching ad-hoc builds against your real saved connections.
 
 ## Tests
 
