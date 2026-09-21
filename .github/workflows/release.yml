@@ -40,6 +40,58 @@ jobs:
         with:
           ref: ${{ env.RELEASE_TAG }}
           persist-credentials: false
+      - name: Prepare build tools
+        id: toolchain
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: '1'
+          HOMEBREW_NO_INSTALL_CLEANUP: '1'
+        run: |
+          command -v xcodegen >/dev/null || brew install xcodegen
+          xcodebuild -version
+          echo "version=$(xcodebuild -version | shasum -a 256 | cut -d ' ' -f 1)" >> "$GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          xcodegen generate
+      - name: Restore Swift packages
+        id: packages
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: DerivedData/SourcePackages
+          key: packages-v1-${{ runner.os }}-${{ runner.arch }}-${{ steps.toolchain.outputs.version }}-${{ hashFiles('Posty.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          restore-keys: |
+            packages-v1-${{ runner.os }}-${{ runner.arch }}-${{ steps.toolchain.outputs.version }}-
+      - name: Resolve locked dependencies
+        if: steps.packages.outputs.cache-hit != 'true'
+        run: |
+          xcodebuild -resolvePackageDependencies -project Posty.xcodeproj -scheme Posty \
+            -clonedSourcePackagesDirPath DerivedData/SourcePackages \
+            -onlyUsePackageVersionsFromResolvedFile -skipPackageUpdates
+          git diff --exit-code -- Posty.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
+      - name: Save Swift packages
+        if: steps.packages.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: DerivedData/SourcePackages
+          key: ${{ steps.packages.outputs.cache-primary-key }}
+      - name: Restore compiler cache
+        id: compiler
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          # Cache compiler results, never signed products, archives, or credentials.
+          path: DerivedData/CompilationCache.noindex
+          key: compiler-v1-${{ runner.os }}-${{ runner.arch }}-${{ steps.toolchain.outputs.version }}-release-${{ steps.toolchain.outputs.commit }}
+          restore-keys: |
+            compiler-v1-${{ runner.os }}-${{ runner.arch }}-${{ steps.toolchain.outputs.version }}-release-
+            compiler-v1-${{ runner.os }}-${{ runner.arch }}-${{ steps.toolchain.outputs.version }}-
+      - name: Test
+        run: |
+          xcodebuild -project Posty.xcodeproj -scheme Posty \
+            -configuration Debug -destination 'platform=macOS' \
+            -clonedSourcePackagesDirPath DerivedData/SourcePackages \
+            -disableAutomaticPackageResolution -skipPackageUpdates \
+            COMPILATION_CACHE_ENABLE_CACHING=YES COMPILER_INDEX_STORE_ENABLE=NO \
+            COMPILATION_CACHE_CAS_PATH="$PWD/DerivedData/CompilationCache.noindex" \
+            -derivedDataPath DerivedData CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= \
+            CODE_SIGNING_REQUIRED=NO test
       - name: Install signing and notarization credentials
         env:
           APPLE_DEVELOPER_ID_CERTIFICATE_BASE64: ${{ secrets.APPLE_DEVELOPER_ID_CERTIFICATE_BASE64 }}
@@ -74,21 +126,14 @@ jobs:
           xcrun notarytool store-credentials posty --key "$RUNNER_TEMP/notary.p8" \
             --key-id "$APPLE_NOTARY_KEY_ID" --issuer "$APPLE_NOTARY_ISSUER_ID" --keychain "$keychain"
           rm "$RUNNER_TEMP/developer-id.p12" "$RUNNER_TEMP/notary.p8"
-      - name: Generate project
-        run: |
-          brew install xcodegen
-          xcodebuild -version
-          xcodegen generate
-      - name: Test
-        run: |
-          xcodebuild -project Posty.xcodeproj -scheme Posty \
-            -configuration Debug -destination 'platform=macOS' \
-            -derivedDataPath DerivedData CODE_SIGN_IDENTITY=- DEVELOPMENT_TEAM= \
-            CODE_SIGNING_REQUIRED=NO test
       - name: Archive universal app
         run: |
           xcodebuild -project Posty.xcodeproj -scheme Posty -configuration Release \
             -destination 'generic/platform=macOS' -derivedDataPath DerivedData \
+            -clonedSourcePackagesDirPath DerivedData/SourcePackages \
+            -disableAutomaticPackageResolution -skipPackageUpdates \
+            COMPILATION_CACHE_ENABLE_CACHING=YES COMPILER_INDEX_STORE_ENABLE=NO \
+            COMPILATION_CACHE_CAS_PATH="$PWD/DerivedData/CompilationCache.noindex" \
             -archivePath build/Posty.xcarchive 'ARCHS=arm64 x86_64' ONLY_ACTIVE_ARCH=NO \
             MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$GITHUB_RUN_NUMBER" archive
           app=build/Posty.xcarchive/Products/Applications/Posty.app
@@ -102,6 +147,12 @@ jobs:
             grep -q 'flags=.*runtime' build/signature.txt
             grep -q '^Timestamp=' build/signature.txt
           done
+      - name: Save compiler cache
+        if: steps.compiler.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: DerivedData/CompilationCache.noindex
+          key: ${{ steps.compiler.outputs.cache-primary-key }}
       - name: Notarize and staple
         run: |
           app=build/Posty.xcarchive/Products/Applications/Posty.app
@@ -128,6 +179,7 @@ jobs:
           path: |
             build/Posty.xcarchive.zip
             build/notarization.json
+          compression-level: 0
           retention-days: 30
       - name: Check out Homebrew tap
         if: env.PRERELEASE == 'false'
