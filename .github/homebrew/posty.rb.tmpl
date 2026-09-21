@@ -1,0 +1,15 @@
+cask "posty" do
+  version "@VERSION@"
+  sha256 "@SHA256@"
+
+  url "https://api.github.com/repos/coryoso/posty/releases/assets/@ASSET_ID@",
+      header: ["Accept: application/octet-stream",
+               "Authorization: Bearer #{ENV.fetch("HOMEBREW_GITHUB_API_TOKEN", "")}"]
+  name "Posty"
+  desc "Native PostgreSQL client"
+  homepage "https://github.com/coryoso/posty"
+
+  depends_on macos: ">= :tahoe"
+
+  app "Posty.app"
+end

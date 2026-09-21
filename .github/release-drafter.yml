@@ -1,0 +1,73 @@
+name-template: 'v$RESOLVED_VERSION'
+tag-template: 'v$RESOLVED_VERSION'
+tag-prefix: v
+change-template: '- $TITLE (#$NUMBER) $AUTHORS'
+change-title-escapes: '\<*_&'
+
+categories:
+  - type: pre-exclude
+    when:
+      label: skip-changelog
+  - title: Breaking changes
+    exclusive: true
+    semver-increment: major
+    when:
+      label: breaking
+  - title: Features
+    exclusive: true
+    semver-increment: minor
+    when:
+      label: feature
+  - title: Fixes
+    exclusive: true
+    when:
+      labels: [fix, bug]
+  - title: Performance
+    exclusive: true
+    when:
+      label: performance
+  - title: Dependencies
+    exclusive: true
+    when:
+      label: dependencies
+  - title: Documentation
+    exclusive: true
+    when:
+      label: documentation
+  - title: Maintenance
+    exclusive: true
+    when:
+      label: maintenance
+  - title: Other changes
+
+template: |
+  $CHANGES
+
+autolabeler:
+  - label: breaking
+    title: ['/^[a-z]+(?:\([^)]*\))?!:/i']
+  - label: feature
+    title: ['/^(feat|feature)(\([^)]*\))?!?:/i']
+    branch: ['/^(feat|feature)\//i']
+  - label: fix
+    title: ['/^(fix|bugfix)(\([^)]*\))?!?:/i']
+    branch: ['/^(fix|bugfix|hotfix)\//i']
+  - label: performance
+    title: ['/^(perf|performance)(\([^)]*\))?!?:/i']
+  - label: documentation
+    title: ['/^(docs)(\([^)]*\))?!?:/i']
+    files: ['**/*.md']
+  - label: dependencies
+    title: ['/^(deps)(\([^)]*\))?!?:/i']
+    files: ['**/Package.resolved']
+  - label: maintenance
+    title: ['/^(chore|ci|build|refactor|test)(\([^)]*\))?!?:/i']
+    files: ['.github/**', 'project.yml', 'Tests/**']
+  - label: 'area: database'
+    files: ['Sources/Posty/Database/**']
+  - label: 'area: interface'
+    files: ['Sources/Posty/Views/**', 'Sources/Posty/ViewModels/**']
+  - label: 'area: ai'
+    files: ['Sources/Posty/AI/**']
+  - label: 'area: security'
+    files: ['Sources/Posty/SSH/**', 'Sources/PostySSHAskPass/**', 'Sources/Posty/Persistence/KeychainConnectionStore.swift']
