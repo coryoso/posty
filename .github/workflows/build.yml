@@ -41,6 +41,7 @@ jobs:
           restore-keys: |
             packages-v1-${{ runner.os }}-${{ runner.arch }}-${{ steps.toolchain.outputs.version }}-
       - name: Resolve locked dependencies
+        if: steps.packages.outputs.cache-hit != 'true'
         run: |
           xcodebuild -resolvePackageDependencies -project Posty.xcodeproj -scheme Posty \
             -clonedSourcePackagesDirPath DerivedData/SourcePackages \
