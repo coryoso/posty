@@ -64,6 +64,10 @@ jobs:
           security unlock-keychain -p "$password" "$keychain"
           security import "$RUNNER_TEMP/developer-id.p12" -P "$APPLE_DEVELOPER_ID_CERTIFICATE_PASSWORD" \
             -k "$keychain" -T /usr/bin/codesign -T /usr/bin/security
+          curl --fail --silent --show-error --location \
+            https://www.apple.com/certificateauthority/DeveloperIDCA.cer \
+            --output "$RUNNER_TEMP/DeveloperIDCA.cer"
+          security import "$RUNNER_TEMP/DeveloperIDCA.cer" -k "$keychain" -t cert
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$password" "$keychain" >/dev/null
           security list-keychains -d user -s "$keychain" "$HOME/Library/Keychains/login.keychain-db"
           security find-identity -v -p codesigning "$keychain"
@@ -91,6 +95,13 @@ jobs:
           codesign --verify --deep --strict --verbose=2 "$app"
           lipo -verify_arch arm64 x86_64 "$app/Contents/MacOS/Posty"
           lipo -verify_arch arm64 x86_64 "$app/Contents/MacOS/PostySSHAskPass"
+          for executable in "$app" "$app/Contents/MacOS/PostySSHAskPass"; do
+            codesign --verify --strict "$executable"
+            codesign -dv --verbose=2 "$executable" 2>&1 | tee build/signature.txt
+            grep -q 'Authority=Developer ID Application: Cornelius Carl (JD26ZWJ4WW)' build/signature.txt
+            grep -q 'flags=.*runtime' build/signature.txt
+            grep -q '^Timestamp=' build/signature.txt
+          done
       - name: Notarize and staple
         run: |
           app=build/Posty.xcarchive/Products/Applications/Posty.app
@@ -152,4 +163,4 @@ jobs:
         if: always()
         run: |
           security delete-keychain "$RUNNER_TEMP/posty-signing.keychain-db" || true
-          rm -f "$RUNNER_TEMP/developer-id.p12" "$RUNNER_TEMP/notary.p8" "$RUNNER_TEMP/Posty-notarization.zip"
+          rm -f "$RUNNER_TEMP/DeveloperIDCA.cer" "$RUNNER_TEMP/developer-id.p12" "$RUNNER_TEMP/notary.p8" "$RUNNER_TEMP/Posty-notarization.zip"
